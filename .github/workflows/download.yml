@@ -1,0 +1,28 @@
+name: Compute image
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Name to store'
+        default: 'nginx-exporter'
+        required: true
+
+jobs:
+  download:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Build docker image
+      run: docker build -t "${{ github.event.inputs.name }}:latest" .
+      shell: bash
+      
+    - name: Create archive
+      run: docker save "${{ github.event.inputs.name }}:latest" | gzip > export.tar.gz
+      
+    - uses: actions/upload-artifact@v3
+      with:
+        path: "export.tar.gz"
